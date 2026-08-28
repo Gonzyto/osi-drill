@@ -51,14 +51,29 @@
   .proto-full{font-family:var(--mono); font-size:15px; color:var(--muted); margin-top:6px}
   .cbadge{display:inline-block; font-family:var(--mono); font-size:11px; font-weight:700;
     color:var(--lc); border:1px solid var(--lc); border-radius:6px; padding:3px 8px; margin-top:14px}
-  .pc{margin-top:14px;border:1px solid rgba(255,255,255,.14);border-radius:10px;overflow:hidden;background:rgba(255,255,255,.03)}
-  .pc>summary{list-style:none;cursor:pointer;padding:11px 14px;font-weight:700;font-size:14px;letter-spacing:.02em;color:var(--lc);display:flex;align-items:center;gap:8px;user-select:none}
-  .pc>summary::-webkit-details-marker{display:none}
-  .pc>summary::before{content:"\25B8";display:inline-block;transition:transform .15s;font-size:12px}
-  .pc[open]>summary::before{transform:rotate(90deg)}
-  .pc .pcbody{padding:2px 16px 14px;font-size:15px;line-height:1.62;border-top:1px solid rgba(255,255,255,.10)}
-  .pc .pcbody p{margin:11px 0}
-  .pc .pcbody b{color:var(--lc)}
+  .pcbtn{margin-top:14px;display:inline-flex;align-items:center;gap:8px;cursor:pointer;
+    background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.16);border-radius:10px;
+    padding:11px 16px;font:inherit;font-weight:700;font-size:14px;letter-spacing:.02em;color:var(--lc)}
+  .pcbtn:hover{background:rgba(255,255,255,.09)}
+  .pcbtn::before{content:"?";display:inline-flex;align-items:center;justify-content:center;
+    width:18px;height:18px;border-radius:50%;border:1.5px solid currentColor;font-size:12px;font-weight:700}
+  .pcmodal{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;
+    justify-content:center;z-index:1100;padding:16px}
+  .pcmodal.show{display:flex}
+  .pcmodal-inner{background:var(--panel2);border:1px solid var(--line);border-radius:12px;
+    width:min(760px,96vw);max-height:88vh;display:flex;flex-direction:column;
+    box-shadow:0 10px 50px rgba(0,0,0,.6);cursor:auto}
+  .pcmodal-head{display:flex;align-items:flex-start;gap:12px;padding:16px 18px 12px;
+    border-bottom:1px solid var(--line)}
+  .pcmodal-head .h1{flex:1;min-width:0}
+  .pcmodal-head .t{font-family:var(--mono);font-weight:700;font-size:16px;color:var(--lc)}
+  .pcmodal-head .m{font-size:12px;color:var(--muted);margin-top:3px}
+  .pcmodal-x{flex:none;background:none;border:1px solid var(--line);color:var(--muted);
+    border-radius:8px;width:30px;height:30px;font-size:17px;line-height:1;cursor:pointer}
+  .pcmodal-x:hover{color:var(--txt)}
+  .pcmodal-body{overflow-y:auto;padding:4px 18px 18px;font-size:15px;line-height:1.62;color:var(--txt)}
+  .pcmodal-body p{margin:13px 0}
+  .pcmodal-body b{color:var(--lc)}
   .qrole{font-size:18px; line-height:1.5; color:var(--txt)}
   .qrole .ports{font-family:var(--mono); color:var(--lc); font-weight:700}
   .tlschip{font-family:var(--mono); font-size:10px; font-weight:700; color:#0e1116; background:var(--c5);
@@ -139,6 +154,7 @@
 </head>
 <body>
 <div class="lightbox" id="lightbox"><div class="lightbox-inner"><img id="lightboxImg" src="" alt=""><div class="lightbox-cap" id="lightboxCap"></div></div></div>
+<div class="pcmodal" id="pcmodal"><div class="pcmodal-inner" id="pcmodalInner"><div class="pcmodal-head"><div class="h1"><div class="t" id="pcmodalT"></div><div class="m" id="pcmodalM"></div></div><button class="pcmodal-x" id="pcmodalX" title="Fermer">&times;</button></div><div class="pcmodal-body" id="pcmodalB"></div></div></div>
 <div class="wrap">
   <header class="top"><div class="logo">OSI<b>·</b>drill</div><div class="sub">révision protocoles réseau</div></header>
   <div class="intro">On choisit un mode et un périmètre. Tu tapes ta réponse, tu valides avec <kbd>Ctrl</kbd>+<kbd>Entrée</kbd> (ou « Je ne sais pas »). Pour le rôle c'est toi qui juges ; pour le protocole et les ports, la correction est automatique et tolérante. « Mélanger » relance un tirage, « Refaire les ratées » rejoue tes erreurs.</div>
@@ -1711,7 +1727,7 @@ function reveal(o){
     : "";
   const tipBox  = `<div class="tip"><div class="tl">En situation</div>${p.tip}</div>`;
   const pcTxt   = COMPRENDRE[p.id]||"";
-  const pcBox   = pcTxt ? `<details class="pc"><summary>Pour comprendre</summary><div class="pcbody">${pcTxt}</div></details>` : "";
+  const pcBox   = pcTxt ? `<button type="button" class="pcbtn" id="pcOpen">Pour comprendre</button>` : "";
   const idMeta  = `${p.acronyme}${atk} · ${p.nom_complet} · Couche ${p.couche} · ${L.nom}`;
 
   let qRecap, hero, support;
@@ -1760,6 +1776,8 @@ function reveal(o){
       ${judgeHtml}
     </div>`;
   setFill((state.i+0.5)/state.queue.length);
+  const pcb=document.getElementById("pcOpen");
+  if(pcb){ pcb.addEventListener("click",()=>openComprendre(p,L)); }
   const nx=document.getElementById("jNext");
   if(nx){ nx.addEventListener("click",advance); nx.focus(); }
   else{
@@ -1796,6 +1814,27 @@ document.addEventListener("keydown",e=>{
 });
 
 function escapeHtml(s){ return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+// ---- Fenetre « Pour comprendre » ----
+window.openComprendre=function(p,L){
+  document.getElementById("pcmodalT").textContent=p.acronyme+" · "+p.nom_complet;
+  document.getElementById("pcmodalM").textContent="Couche "+p.couche+" · "+L.nom;
+  const b=document.getElementById("pcmodalB");
+  b.innerHTML=COMPRENDRE[p.id]||"";
+  b.scrollTop=0;
+  document.getElementById("pcmodalInner").style.setProperty("--lc",L.v);
+  document.getElementById("pcmodal").className="pcmodal show";
+};
+window.closeComprendre=function(){
+  document.getElementById("pcmodal").className="pcmodal";
+};
+document.getElementById("pcmodal").onclick=function(e){
+  if(e.target===this) window.closeComprendre();
+};
+document.getElementById("pcmodalX").onclick=window.closeComprendre;
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape" && document.getElementById("pcmodal").classList.contains("show")){ window.closeComprendre(); }
+});
 
 // ---- Lightbox : clic sur une image pour l'agrandir ----
 function readableLabel(name){

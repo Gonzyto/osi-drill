@@ -378,7 +378,6 @@ document.addEventListener("keydown",e=>{
 
 function escapeHtml(s){ return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
 
-document.getElementById("modeSel").addEventListener("change",e=>{ state.mode=e.target.value; 
 // ---- Lightbox : clic sur une image pour l'agrandir ----
 window.openLightbox=function(src){
   document.getElementById("lightboxImg").src=src;
@@ -398,7 +397,7 @@ function imgTag(name){
              else{this.closest('.rimgs') && this.remove();}">`;
 }
 
-updateTlsVisibility(); newDeck(); });
+document.getElementById("modeSel").addEventListener("change",e=>{ state.mode=e.target.value; updateTlsVisibility(); newDeck(); });
 document.getElementById("scopeSel").addEventListener("change",e=>{ state.scope=e.target.value; newDeck(); });
 document.getElementById("tlsToggle").addEventListener("change",e=>{ state.tls=e.target.checked; newDeck(); });
 document.getElementById("shuffleBtn").addEventListener("click",newDeck);

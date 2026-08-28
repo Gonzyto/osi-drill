@@ -126,6 +126,7 @@
 </style>
 </head>
 <body>
+<div class="lightbox" id="lightbox"><img id="lightboxImg" src="" alt=""></div>
 <div class="wrap">
   <header class="top"><div class="logo">OSI<b>·</b>drill</div><div class="sub">révision protocoles réseau</div></header>
   <div class="intro">On choisit un mode et un périmètre. Tu tapes ta réponse, tu valides avec <kbd>Ctrl</kbd>+<kbd>Entrée</kbd> (ou « Je ne sais pas »). Pour le rôle c'est toi qui juges ; pour le protocole et les ports, la correction est automatique et tolérante. « Mélanger » relance un tirage, « Refaire les ratées » rejoue tes erreurs.</div>
@@ -405,6 +406,5 @@ document.getElementById("replayBtn").addEventListener("click",()=>{ if(!state.mi
 
 updateTlsVisibility(); newDeck();
 </script>
-<div class="lightbox" id="lightbox"><img id="lightboxImg" src="" alt=""></div>
 </body>
 </html>

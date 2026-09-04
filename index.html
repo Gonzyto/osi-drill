@@ -1737,7 +1737,7 @@ function showQuestion(){
       </div>
     </div>`;
   const ta=document.getElementById("ans"); ta.focus();
-  ta.addEventListener("keydown",ev=>{ if(ev.key==="Enter"&&(ev.ctrlKey||ev.metaKey)){ ev.preventDefault(); submit(); } });
+  ta.addEventListener("keydown",ev=>{ if(ev.key==="Enter"&&(ev.ctrlKey||ev.metaKey)){ ev.preventDefault(); ev.stopPropagation(); submit(); } });
   document.getElementById("validateBtn").addEventListener("click",submit);
   document.getElementById("dunnoBtn").addEventListener("click",dunno);
   document.getElementById("hintBtn").addEventListener("click",e=>{ document.getElementById("hintOut").textContent=hintTxt; e.target.disabled=true; e.target.textContent="Indice :"; });
@@ -1856,6 +1856,7 @@ function showEnd(){
 }
 
 document.addEventListener("keydown",e=>{
+  if(e.ctrlKey||e.metaKey) return;
   if(document.getElementById("jNext")){ if(e.key==="Enter"){ e.preventDefault(); advance(); } return; }
   if(!document.getElementById("jGood")) return;
   if(e.key==="1"){ e.preventDefault(); finalize(true); advance(); }
